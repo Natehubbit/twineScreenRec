@@ -1,5 +1,4 @@
-import React from 'react'
-
+// screen sharing options
 const RECORD_OPTIONS = {
     video: {
       cursor: "always"
@@ -7,9 +6,18 @@ const RECORD_OPTIONS = {
     audio: true
 }
 
+// video format options
+const VIDEO_OPTIONS ={
+  mimeType: 'video/webm'
+}
+
 export default class RecordingService {
   /**
-   * static ref for video node
+   * @var videoRef ref for html video element
+   * @var msgContainer ref for html message node
+   * @var micStream ref for audio recorder
+   * @var fullStream combined video and audio MediaStream
+   * @var recordedChunks video data recorded
    */
   static videoRef = document.getElementById("video")
   static msgContainer = document.getElementById("message")
@@ -66,7 +74,11 @@ export default class RecordingService {
    * function to hide video
    */
   static hideVideo = () => {
-    this.videoRef.style.display="none"
+    try {
+      this.videoRef.style.display="none"
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   /**
@@ -84,50 +96,77 @@ export default class RecordingService {
    * function to hide message
    */
   static removeMessage = () => {
-    this.msgContainer.style.display='none'
-  }
-
-  static recordVideo = async () => {
-    this.micStream = await navigator.mediaDevices.getUserMedia({audio:true})
-    this.videoRef.srcObject = await navigator.mediaDevices.getDisplayMedia(RECORD_OPTIONS)
-    // combine video and audio tracks
-    const vid = this.videoRef.srcObject
-    const mic = this.micStream
-    this.fullStream = new MediaStream([
-      ...vid.getVideoTracks(),
-      ...mic.getAudioTracks()
-    ])
-    // play video with audio
-    this.videoRef.srcObject=this.fullStream
-
-    const handleDataAvailable = (event) => {
-      if (event.data.size > 0) {
-        this.recordedChunks.push(event.data);
-      }
+    try {
+      this.msgContainer.style.display='none'
+    } catch (error) {
+      console.log(error.message)
     }
-    const options = {mimeType: 'video/webm'};
-    this.mediaRecorder = new MediaRecorder(this.fullStream, options);
-    this.mediaRecorder.ondataavailable = handleDataAvailable;
-    this.mediaRecorder.start();
+  }
+  /**
+   * function to save shared screen in memory
+   */
+  static recordVideo = async () => {
+    try {
+      // combine video and audio tracks as stream and play on screen
+      this.micStream = await navigator.mediaDevices.getUserMedia({audio:true})
+      this.videoRef.srcObject = await navigator.mediaDevices.getDisplayMedia(RECORD_OPTIONS)
+      const vid = this.videoRef.srcObject
+      const mic = this.micStream
+      this.fullStream = new MediaStream([
+        ...vid.getVideoTracks(),
+        ...mic.getAudioTracks()
+      ])
+      this.videoRef.srcObject=this.fullStream
+
+      // convert stream to webm format
+      this.mediaRecorder = new MediaRecorder(this.fullStream, VIDEO_OPTIONS);
+      this.mediaRecorder.ondataavailable = this.handleDataAvailable;
+      this.mediaRecorder.start();
+    } catch (error) {
+      console.log("Error: ",error.message)
+    }
   }
 
+  /**
+   * event handler that records chunks of tracks
+   * @param {object} event recorded video data
+   */
+  static handleDataAvailable = (event) => {
+    if (event && event.data.size > 0) {
+      this.recordedChunks.push(event.data);
+    }
+  }
+
+  /**
+   * function stop saving recording to memory
+   */
   static endRecording = async () => {
-    this.mediaRecorder.stop()
-    
+    try {
+      this.mediaRecorder.stop()
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
+  /**
+   * function to download recorded video
+   */
   static downloadVideo = () => {
-    const blob = new Blob(this.recordedChunks, {
-      type: 'video/webm'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    document.body.appendChild(a);
-    a.style = 'display: none';
-    a.href = url;
-    a.download = 'video.webm';
-    a.click();
-    window.URL.revokeObjectURL(url);
-    this.removeMessage()
+    try {
+      const blob = new Blob(this.recordedChunks, {
+        type: 'video/webm'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      a.href = url;
+      a.download = 'video.webm';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.removeMessage()
+    } catch (error) {
+      console.log("Error: ",error.message)
+    }
   }
 }
