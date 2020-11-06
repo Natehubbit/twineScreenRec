@@ -5,26 +5,37 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@types/dom-mediacapture-record": "^1.0.7",
+    "@types/react": "^16.9.55",
+    "@types/react-native": "^0.63.32",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-native-video": "5.1.0-alpha8",
     "react-native-web": "0.14.7",
-    "react-native-webview": "10.9.2",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "typescript": "^4.0.5"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
+    "babel-eslint": "^10.1.0",
     "eslint": "^7.12.1",
+    "eslint-config-prettier": "^6.15.0",
     "eslint-config-standard": "^16.0.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.21.5"
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-native": "^3.10.0",
+    "prettier": "^2.1.2"
   },
   "scripts": {
     "start": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix"
   },
   "browserslist": {
     "production": [
